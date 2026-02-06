@@ -54,6 +54,12 @@ function initializeSheets() {
     summariesSheet.appendRow(['Week', 'Summary', 'Key Insights', 'Action Items']);
   }
 
+  // Competitor Profiles sheet
+  const profilesSheet = ss.getSheetByName('Competitor Profiles');
+  if (profilesSheet && profilesSheet.getLastRow() === 0) {
+    profilesSheet.appendRow(['Competitor', 'Category', 'Summary', 'URL', 'Last Updated']);
+  }
+
   Logger.log('Sheets initialized successfully');
 }
 
@@ -82,6 +88,7 @@ function onOpen() {
   ui.createMenu('Competitor Intel')
     .addItem('Initialize Sheets', 'initializeSheets')
     .addItem('Fetch News Now', 'fetchGoogleAlertsNews')
+    .addItem('Update Competitor Profiles', 'updateCompetitorProfiles')
     .addItem('Generate Summary', 'generateWeeklySummary')
     .addItem('Send Digest Email', 'sendDigestEmail')
     .addSeparator()

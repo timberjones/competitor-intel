@@ -34,6 +34,7 @@ competitor-intel/
 │   ├── Code.gs                # Main entry, config, menu
 │   ├── WebhookReceiver.gs     # Receives data from GitHub Actions (NO Google Cloud!)
 │   ├── NewsMonitor.gs         # Google Alerts RSS processing
+│   ├── CompetitorProfiles.gs  # Competitor profile scraping and caching
 │   ├── LLMAnalysis.gs         # Gemini API integration
 │   └── EmailDigest.gs         # Weekly report generation
 ├── snapshots/                  # Website content snapshots (git-tracked)
@@ -94,6 +95,7 @@ For Apps Script, set these in Project Settings > Script Properties:
 | Website Changes | Date, Competitor, Page, Change Type, Old Content, New Content, Significance | Detailed diffs |
 | Job Postings | Date, Competitor, Role, Department, Location, Notes | Hiring activity |
 | Weekly Summaries | Week, Summary, Key Insights, Action Items | LLM-generated digests |
+| Competitor Profiles | Competitor, Category, Summary, URL, Last Updated | **Cached** AI-generated competitor summaries (updated separately) |
 
 ## Competitors Tracked
 
@@ -142,26 +144,61 @@ For Apps Script, set these in Project Settings > Script Properties:
 4. Webhook writes changes to Google Sheets
 5. Apps Script trigger runs → fetches Google Alerts RSS
 6. Apps Script calls Gemini API → generates summary
-7. Email digest sent to you for review
+7. Email digest sent (reads cached competitor profiles from sheet for speed)
+
+**Profile Update flow (run separately, weekly/bi-weekly):**
+1. Manual or scheduled trigger → `updateCompetitorProfiles()`
+2. Scrapes all competitor websites (30-60 seconds)
+3. Calls Gemini API for AI summaries
+4. Updates "Competitor Profiles" sheet tab
+5. Email digests read from this cache (instant!)
 
 ## Key Files to Edit
 
 | Task | File(s) |
 |------|---------|
-| Add new competitor | `scripts/website-scraper/competitors.json` |
+| Add new competitor | `scripts/website-scraper/competitors.json` AND `apps-script/CompetitorProfiles.gs` (competitors array) |
 | Change scraping logic | `scripts/website-scraper/index.js` |
 | Add Google Alert RSS | `apps-script/NewsMonitor.gs` (ALERT_FEEDS object) |
 | Modify email format | `apps-script/EmailDigest.gs` |
-| Change LLM prompts | `apps-script/LLMAnalysis.gs` |
+| Change LLM prompts | `apps-script/LLMAnalysis.gs` or `apps-script/CompetitorProfiles.gs` |
+| Update profile summaries | Run `updateCompetitorProfiles()` manually or schedule it |
 | Adjust schedule | `.github/workflows/*.yml` (cron expression) |
+
+## Competitor Profile Updates
+
+**Why separate from email digest?**
+- Scraping 4 websites + calling Gemini 4 times is slow (30-60 seconds)
+- Email digest needs to be fast and reliable
+- Profiles don't change that often (weekly/bi-weekly is fine)
+- If profile update fails, email still works with cached data
+
+**How it works:**
+1. **Update profiles** (slow, run manually or scheduled separately):
+   - Sheet menu: `Competitor Intel → Update Competitor Profiles`
+   - Or run: `updateCompetitorProfiles()` in Apps Script
+   - Scrapes competitor websites and generates AI summaries
+   - Writes to "Competitor Profiles" sheet tab with timestamp
+
+2. **Email digest** (fast, uses cached profiles):
+   - Reads from "Competitor Profiles" sheet (instant!)
+   - No scraping or API calls during email generation
+   - Shows when profiles were last updated
+
+**Menu options:**
+- `Update Competitor Profiles` - Refresh all profiles (30-60 sec)
+- `Send Digest Email` - Fast, uses cached profiles
+- `Run Full Weekly Digest` - Runs news + summary + email (doesn't update profiles)
 
 ## Development Workflow
 
 1. **Adding a competitor:**
    - Add to `competitors.json` with pages to monitor
+   - Add to `CompetitorProfiles.gs` competitors array
    - Commit and push to GitHub
    - Create Google Alerts for the competitor name
    - Add RSS feed URL to `NewsMonitor.gs` in Apps Script editor
+   - Run `updateCompetitorProfiles()` to generate initial profile
 
 2. **Testing changes (all cloud-based):**
    - Push code changes to GitHub
@@ -181,6 +218,7 @@ For Apps Script, set these in Project Settings > Script Properties:
    - Create GitHub repo and push code
    - Set up repository secrets (webhook URL, API key)
    - Enable GitHub Actions
+   - Run `updateCompetitorProfiles()` to populate initial profiles
    - No Google Cloud or service account needed!
 
 ## Conventions
