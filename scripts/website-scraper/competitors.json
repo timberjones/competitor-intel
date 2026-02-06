@@ -1,0 +1,75 @@
+{
+  "competitors": [
+    {
+      "id": "plantant",
+      "name": "PlantANT",
+      "category": "B2B Platform",
+      "website": "https://www.plantant.com",
+      "priority": "high",
+      "pages": [
+        { "name": "Homepage", "url": "https://www.plantant.com/" },
+        { "name": "Wholesale Nurseries", "url": "https://www.plantant.com/wholesale-nurseries-grower-news" }
+      ],
+      "careerPage": null
+    },
+    {
+      "id": "plantbid",
+      "name": "PlantBid",
+      "category": "Auction",
+      "website": "https://plantbid.com",
+      "priority": "high",
+      "pages": [
+        { "name": "Homepage", "url": "https://hello.plantbid.com/" },
+        { "name": "For Buyers", "url": "https://plantbid.com/for-buyers" }
+      ],
+      "careerPage": null
+    },
+    {
+      "id": "siteone",
+      "name": "SiteOne Landscape Supply",
+      "category": "Incumbent",
+      "website": "https://www.siteone.com",
+      "priority": "medium",
+      "pages": [
+        { "name": "Homepage", "url": "https://www.siteone.com/en/" },
+        { "name": "About Us", "url": "https://www.siteone.com/en/aboutus" },
+        { "name": "Landscape Supply", "url": "https://www.siteone.com/en/landscape-supply/c/sh12" }
+      ],
+      "careerPage": "https://careers.siteone.com"
+    },
+    {
+      "id": "landscapehub",
+      "name": "LandscapeHub",
+      "category": "Marketplace",
+      "website": "https://www.landscapehub.com",
+      "priority": "medium",
+      "pages": [
+        { "name": "Homepage", "url": "https://www.landscapehub.com/" },
+        { "name": "About", "url": "https://www.landscapehub.com/about" },
+        { "name": "Suppliers", "url": "https://www.landscapehub.com/suppliers" }
+      ],
+      "careerPage": "https://www.landscapehub.com/careers"
+    },
+    {
+      "id": "landone",
+      "name": "LandOne Group",
+      "category": "Regional Services",
+      "website": "https://landone.com",
+      "priority": "low",
+      "notes": "Landscape services company (not supplier) - monitor for expansion/acquisitions",
+      "pages": [
+        { "name": "Homepage", "url": "https://landone.com/" },
+        { "name": "Services", "url": "https://landone.com/services" },
+        { "name": "About", "url": "https://landone.com/about" }
+      ],
+      "careerPage": null
+    }
+  ],
+  "discoveryKeywords": [
+    "landscaping procurement software",
+    "wholesale plant marketplace",
+    "nursery software startup",
+    "landscape supply chain technology",
+    "B2B plant sourcing platform"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "competitor-website-scraper",
+  "version": "1.0.0",
+  "description": "Website change detection for competitor monitoring",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "scrape": "node index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^3.3.2",
+    "diff": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
