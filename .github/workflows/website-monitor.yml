@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: scripts/website-scraper
-        run: npm ci
+        run: npm install
 
       - name: Run website scraper
         working-directory: scripts/website-scraper
