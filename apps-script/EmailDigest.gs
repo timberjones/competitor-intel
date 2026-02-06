@@ -26,9 +26,12 @@ function sendDigestEmail(summary) {
   const findings = getRecentFindingsForEmail(findingsSheet, weekStart);
   const websiteChanges = getRecentChangesForEmail(websiteSheet, weekStart);
 
+  // Get fresh competitor profiles
+  const profiles = getCompetitorProfiles();
+
   // Build email HTML
-  const htmlBody = buildEmailHtml(summary, findings, websiteChanges);
-  const plainBody = buildPlainTextEmail(summary, findings, websiteChanges);
+  const htmlBody = buildEmailHtml(summary, findings, websiteChanges, profiles);
+  const plainBody = buildPlainTextEmail(summary, findings, websiteChanges, profiles);
 
   // Get current date for subject
   const today = Utilities.formatDate(new Date(), 'UTC', 'MMM d, yyyy');
@@ -114,7 +117,7 @@ function getRecentChangesForEmail(sheet, startDate) {
 /**
  * Build HTML email content
  */
-function buildEmailHtml(summary, findings, changes) {
+function buildEmailHtml(summary, findings, changes, profiles) {
   const totalFindings = findings.high.length + findings.medium.length + findings.low.length;
   const sheetUrl = SpreadsheetApp.getActiveSpreadsheet().getUrl();
 
@@ -235,6 +238,23 @@ function buildEmailHtml(summary, findings, changes) {
     html += `</table></div>`;
   }
 
+  // Competitor Profiles (always included)
+  if (profiles && profiles.length > 0) {
+    html += `
+  <div class="section">
+    <h2>Competitor Profiles (Updated Weekly)</h2>
+    <p style="color: #7f8c8d; font-size: 14px;">Fresh summaries generated from their current websites</p>`;
+    profiles.forEach(profile => {
+      html += `
+    <div style="border-left: 4px solid #3498db; padding-left: 15px; margin: 15px 0;">
+      <h3 style="margin: 0; color: #2c3e50;">${escapeHtml(profile.name)} <span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">(${escapeHtml(profile.category)})</span></h3>
+      <p style="margin: 10px 0;">${escapeHtml(profile.summary)}</p>
+      <p style="font-size: 12px; color: #7f8c8d;"><a href="${escapeHtml(profile.url)}" style="color: #3498db;">Visit Website</a></p>
+    </div>`;
+    });
+    html += `</div>`;
+  }
+
   html += `
   <div class="footer">
     <p><a href="${sheetUrl}">View Full Data in Google Sheets</a></p>
@@ -249,7 +269,7 @@ function buildEmailHtml(summary, findings, changes) {
 /**
  * Build plain text email (fallback)
  */
-function buildPlainTextEmail(summary, findings, changes) {
+function buildPlainTextEmail(summary, findings, changes, profiles) {
   let text = `COMPETITOR INTELLIGENCE DIGEST
 Weekly Summary - ${Utilities.formatDate(new Date(), 'UTC', 'MMMM d, yyyy')}
 ${'='.repeat(50)}
@@ -283,6 +303,16 @@ ${summary.actionItems}
     text += `\nWEBSITE CHANGES\n${'-'.repeat(30)}\n`;
     changes.forEach(c => {
       text += `* ${c.competitor} (${c.page}): ${c.changeType}\n`;
+    });
+  }
+
+  // Competitor Profiles
+  if (profiles && profiles.length > 0) {
+    text += `\n\nCOMPETITOR PROFILES (Updated Weekly)\n${'-'.repeat(50)}\n`;
+    profiles.forEach(profile => {
+      text += `\n${profile.name} (${profile.category})\n`;
+      text += `${profile.summary}\n`;
+      text += `${profile.url}\n`;
     });
   }
 
