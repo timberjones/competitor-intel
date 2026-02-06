@@ -18,7 +18,7 @@ function callGeminiAPI(prompt) {
     return 'Error: API key not configured. Please set GEMINI_API_KEY in Script Properties.';
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
   const payload = {
     contents: [{

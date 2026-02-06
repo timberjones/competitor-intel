@@ -138,7 +138,7 @@ Provide a concise 2-3 sentence summary covering:
 
 Keep it factual and focused on business model and offerings.`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
   const payload = {
     contents: [{
