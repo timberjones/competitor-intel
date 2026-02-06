@@ -24,14 +24,14 @@ function sendDigestEmail(summary) {
   const weekStart = Utilities.formatDate(oneWeekAgo, 'UTC', 'yyyy-MM-dd');
 
   const findings = getRecentFindingsForEmail(findingsSheet, weekStart);
-  const websiteChanges = getRecentChangesForEmail(websiteSheet, weekStart);
+  const websiteData = getRecentChangesForEmail(websiteSheet, weekStart);
 
   // Get fresh competitor profiles
   const profiles = getCompetitorProfiles();
 
   // Build email HTML
-  const htmlBody = buildEmailHtml(summary, findings, websiteChanges, profiles);
-  const plainBody = buildPlainTextEmail(summary, findings, websiteChanges, profiles);
+  const htmlBody = buildEmailHtml(summary, findings, websiteData.changes, websiteData.features, profiles);
+  const plainBody = buildPlainTextEmail(summary, findings, websiteData.changes, websiteData.features, profiles);
 
   // Get current date for subject
   const today = Utilities.formatDate(new Date(), 'UTC', 'MMM d, yyyy');
@@ -94,12 +94,13 @@ function getRecentFindingsForEmail(sheet, startDate) {
  */
 function getRecentChangesForEmail(sheet, startDate) {
   const data = sheet.getDataRange().getValues();
-  const changes = [];
+  const allChanges = [];
+  const newFeatures = [];
 
   for (let i = 1; i < data.length; i++) {
     const rowDate = data[i][0];
     if (rowDate && rowDate >= startDate) {
-      changes.push({
+      const change = {
         date: data[i][0],
         competitor: data[i][1],
         page: data[i][2],
@@ -107,17 +108,24 @@ function getRecentChangesForEmail(sheet, startDate) {
         oldContent: data[i][4],
         newContent: data[i][5],
         significance: data[i][6]
-      });
+      };
+
+      // Separate new features from regular changes
+      if (change.changeType && change.changeType.toLowerCase().includes('feature')) {
+        newFeatures.push(change);
+      } else {
+        allChanges.push(change);
+      }
     }
   }
 
-  return changes;
+  return { changes: allChanges, features: newFeatures };
 }
 
 /**
  * Build HTML email content
  */
-function buildEmailHtml(summary, findings, changes, profiles) {
+function buildEmailHtml(summary, findings, changes, features, profiles) {
   const totalFindings = findings.high.length + findings.medium.length + findings.low.length;
   const sheetUrl = SpreadsheetApp.getActiveSpreadsheet().getUrl();
 
@@ -159,6 +167,10 @@ function buildEmailHtml(summary, findings, changes, profiles) {
       <div class="stat-label">High Priority</div>
     </div>
     <div class="stat-item">
+      <div class="stat-number" style="color: #9b59b6;">${features.length}</div>
+      <div class="stat-label">New Features</div>
+    </div>
+    <div class="stat-item">
       <div class="stat-number">${changes.length}</div>
       <div class="stat-label">Website Changes</div>
     </div>
@@ -180,6 +192,24 @@ function buildEmailHtml(summary, findings, changes, profiles) {
     <h2>Recommended Actions</h2>
     ${formatListAsHtml(summary.actionItems)}
   </div>`;
+
+  // New Features section (if any)
+  if (features && features.length > 0) {
+    html += `
+  <div class="section">
+    <h2>🚀 New Features Detected</h2>
+    <p style="color: #7f8c8d; font-size: 14px;">Competitor feature announcements and product updates</p>`;
+    features.forEach(feature => {
+      html += `
+    <div class="high" style="border-left-color: #9b59b6;">
+      <span class="competitor-tag" style="background: #9b59b6;">${escapeHtml(feature.competitor)}</span>
+      <strong>${escapeHtml(feature.page)}</strong>
+      <p style="margin: 5px 0;"><em>${escapeHtml(feature.changeType)}</em></p>
+      <p>${escapeHtml(feature.newContent)}</p>
+    </div>`;
+    });
+    html += `</div>`;
+  }
 
   // High priority findings
   if (findings.high.length > 0) {
@@ -269,7 +299,7 @@ function buildEmailHtml(summary, findings, changes, profiles) {
 /**
  * Build plain text email (fallback)
  */
-function buildPlainTextEmail(summary, findings, changes, profiles) {
+function buildPlainTextEmail(summary, findings, changes, features, profiles) {
   let text = `COMPETITOR INTELLIGENCE DIGEST
 Weekly Summary - ${Utilities.formatDate(new Date(), 'UTC', 'MMMM d, yyyy')}
 ${'='.repeat(50)}
@@ -284,6 +314,13 @@ RECOMMENDED ACTIONS
 ${summary.actionItems}
 
 `;
+
+  if (features && features.length > 0) {
+    text += `\n🚀 NEW FEATURES DETECTED\n${'-'.repeat(50)}\n`;
+    features.forEach(f => {
+      text += `* [${f.competitor}] ${f.page}\n  ${f.changeType}: ${f.newContent}\n\n`;
+    });
+  }
 
   if (findings.high.length > 0) {
     text += `HIGH PRIORITY ITEMS\n${'-'.repeat(30)}\n`;

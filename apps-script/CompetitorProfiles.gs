@@ -170,49 +170,82 @@ function fetchCompetitorProfile(competitor) {
 }
 
 /**
- * Extract text from HTML (improved extraction)
+ * Extract structured content from HTML (meta tags + headings + content)
  */
 function extractTextFromHtml(html) {
-  // Remove scripts, styles, navigation, and footers
-  let text = html
+  const sections = [];
+
+  // Extract meta description
+  const metaDescMatch = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i);
+  if (metaDescMatch && metaDescMatch[1]) {
+    sections.push('META DESCRIPTION: ' + metaDescMatch[1]);
+  }
+
+  // Extract Open Graph description
+  const ogDescMatch = html.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i);
+  if (ogDescMatch && ogDescMatch[1] && ogDescMatch[1] !== metaDescMatch?.[1]) {
+    sections.push('OG DESCRIPTION: ' + ogDescMatch[1]);
+  }
+
+  // Extract og:title for additional context
+  const ogTitleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
+  if (ogTitleMatch && ogTitleMatch[1]) {
+    sections.push('PAGE TITLE: ' + ogTitleMatch[1]);
+  }
+
+  // Extract main h1 headings (usually key value props)
+  const h1Matches = html.match(/<h1[^>]*>([^<]+)<\/h1>/gi);
+  if (h1Matches && h1Matches.length > 0) {
+    const h1Texts = h1Matches.map(h => h.replace(/<\/?h1[^>]*>/gi, '').trim()).filter(t => t.length > 0);
+    if (h1Texts.length > 0) {
+      sections.push('MAIN HEADINGS: ' + h1Texts.slice(0, 3).join(' | '));
+    }
+  }
+
+  // Extract first few h2 headings for additional context
+  const h2Matches = html.match(/<h2[^>]*>([^<]+)<\/h2>/gi);
+  if (h2Matches && h2Matches.length > 0) {
+    const h2Texts = h2Matches.map(h => h.replace(/<\/?h2[^>]*>/gi, '').trim()).filter(t => t.length > 0);
+    if (h2Texts.length > 0) {
+      sections.push('SUBHEADINGS: ' + h2Texts.slice(0, 5).join(' | '));
+    }
+  }
+
+  // Extract body content (cleaned) as fallback/additional context
+  let bodyText = html
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
     .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
     .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
-    .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '');
-
-  // Preserve paragraph breaks before removing tags
-  text = text
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<br[^>]*>/gi, '\n')
-    .replace(/<\/div>/gi, '\n')
-    .replace(/<\/h[1-6]>/gi, '\n\n');
-
-  // Remove remaining HTML tags
-  text = text.replace(/<[^>]+>/g, ' ');
-
-  // Decode common HTML entities
-  text = text
+    .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-
-  // Clean up whitespace while preserving paragraph breaks
-  text = text
-    .replace(/[ \t]+/g, ' ')  // Multiple spaces/tabs -> single space
-    .replace(/\n\s+/g, '\n')  // Remove spaces after newlines
-    .replace(/\n{3,}/g, '\n\n')  // Max 2 consecutive newlines
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
     .trim();
 
-  // Limit to first 6000 characters to get more context
-  if (text.length > 6000) {
-    text = text.substring(0, 6000) + '...';
+  // Take first 1500 chars of body content for additional context
+  if (bodyText.length > 1500) {
+    bodyText = bodyText.substring(0, 1500) + '...';
   }
 
-  return text;
+  if (bodyText.length > 100) {
+    sections.push('CONTENT EXCERPT: ' + bodyText);
+  }
+
+  // Combine all sections
+  const fullText = sections.join('\n\n');
+
+  // Limit total to 6000 characters
+  if (fullText.length > 6000) {
+    return fullText.substring(0, 6000) + '...';
+  }
+
+  return fullText;
 }
 
 /**

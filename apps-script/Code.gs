@@ -8,7 +8,11 @@
 const CONFIG = {
   SHEET_ID: PropertiesService.getScriptProperties().getProperty('SHEET_ID') || null, // Optional: for webhook
   GEMINI_API_KEY: PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY'),
-  DIGEST_RECIPIENTS: ['your-email@example.com'], // Update with your email
+  // Email recipients (comma-separated in Script Properties)
+  DIGEST_RECIPIENTS: (function() {
+    const recipientsString = PropertiesService.getScriptProperties().getProperty('DIGEST_RECIPIENTS') || 'your-email@example.com';
+    return recipientsString.split(',').map(email => email.trim()).filter(email => email);
+  })(),
   DIGEST_DAY: 1, // Monday (0 = Sunday, 1 = Monday, etc.)
 };
 

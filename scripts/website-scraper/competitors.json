@@ -8,7 +8,9 @@
       "priority": "high",
       "pages": [
         { "name": "Homepage", "url": "https://www.plantant.com/" },
-        { "name": "Wholesale Nurseries", "url": "https://www.plantant.com/wholesale-nurseries-grower-news" }
+        { "name": "Wholesale Nurseries", "url": "https://www.plantant.com/wholesale-nurseries-grower-news" },
+        { "name": "Features", "url": "https://www.plantant.com/features", "detectFeatures": true },
+        { "name": "Blog", "url": "https://www.plantant.com/wholesale-nurseries-grower-news", "detectFeatures": true }
       ],
       "careerPage": null
     },
@@ -20,7 +22,9 @@
       "priority": "high",
       "pages": [
         { "name": "Homepage", "url": "https://hello.plantbid.com/" },
-        { "name": "For Buyers", "url": "https://plantbid.com/for-buyers" }
+        { "name": "For Buyers", "url": "https://plantbid.com/for-buyers", "detectFeatures": true },
+        { "name": "For Sellers", "url": "https://plantbid.com/for-sellers", "detectFeatures": true },
+        { "name": "Pricing", "url": "https://plantbid.com/pricing", "detectFeatures": true }
       ],
       "careerPage": null
     },
@@ -33,7 +37,9 @@
       "pages": [
         { "name": "Homepage", "url": "https://www.siteone.com/en/" },
         { "name": "About Us", "url": "https://www.siteone.com/en/aboutus" },
-        { "name": "Landscape Supply", "url": "https://www.siteone.com/en/landscape-supply/c/sh12" }
+        { "name": "Landscape Supply", "url": "https://www.siteone.com/en/landscape-supply/c/sh12" },
+        { "name": "Products & Services", "url": "https://www.siteone.com/en/products-and-services", "detectFeatures": true },
+        { "name": "News", "url": "https://www.siteone.com/en/news", "detectFeatures": true }
       ],
       "careerPage": "https://careers.siteone.com"
     },
@@ -46,7 +52,9 @@
       "pages": [
         { "name": "Homepage", "url": "https://www.landscapehub.com/" },
         { "name": "About", "url": "https://www.landscapehub.com/about" },
-        { "name": "Suppliers", "url": "https://www.landscapehub.com/suppliers" }
+        { "name": "Suppliers", "url": "https://www.landscapehub.com/suppliers", "detectFeatures": true },
+        { "name": "How It Works", "url": "https://www.landscapehub.com/how-it-works", "detectFeatures": true },
+        { "name": "Blog", "url": "https://www.landscapehub.com/blog", "detectFeatures": true }
       ],
       "careerPage": "https://www.landscapehub.com/careers"
     },

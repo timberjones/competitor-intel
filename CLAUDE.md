@@ -82,7 +82,8 @@ Set these as GitHub repository secrets:
 | `GEMINI_API_KEY` | Gemini API key for LLM analysis (optional, for future use) |
 
 For Apps Script, set these in Project Settings > Script Properties:
-- `GEMINI_API_KEY`
+- `GEMINI_API_KEY` - Your Gemini API key from Google AI Studio
+- `DIGEST_RECIPIENTS` - Comma-separated email addresses (e.g., `email1@example.com, email2@example.com`)
 
 ## Google Sheet Structure
 

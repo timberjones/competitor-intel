@@ -128,9 +128,23 @@ async function saveSnapshot(competitorId, pageName, content) {
 }
 
 /**
+ * Check if text indicates a new feature announcement
+ */
+function isFeatureAnnouncement(text) {
+  const featureKeywords = [
+    'new feature', 'announcing', 'introducing', 'launched', 'release',
+    'now available', 'just shipped', 'update:', 'coming soon',
+    'beta', 'improved', 'enhanced', 'added support'
+  ];
+
+  const lowerText = text.toLowerCase();
+  return featureKeywords.some(keyword => lowerText.includes(keyword));
+}
+
+/**
  * Compare two snapshots and detect changes
  */
-function detectChanges(oldSnapshot, newContent) {
+function detectChanges(oldSnapshot, newContent, detectFeatures = false) {
   const changes = [];
 
   if (!oldSnapshot) {
@@ -140,10 +154,13 @@ function detectChanges(oldSnapshot, newContent) {
   // Check for new headings (potential new features)
   const newHeadings = newContent.headings.filter(h => !oldSnapshot.headings.includes(h));
   if (newHeadings.length > 0) {
+    // Check if headings suggest new features
+    const isFeature = detectFeatures && newHeadings.some(h => isFeatureAnnouncement(h));
+
     changes.push({
-      type: 'new_sections',
+      type: isFeature ? 'new_feature' : 'new_sections',
       description: `New sections: ${newHeadings.join(', ')}`,
-      significance: 'High'
+      significance: isFeature ? 'High' : 'High'
     });
   }
 
@@ -163,12 +180,15 @@ function detectChanges(oldSnapshot, newContent) {
   const removedLines = diff.filter(d => d.removed).map(d => d.value).join('');
 
   if (addedLines.length > 100 || removedLines.length > 100) {
+    // Check if added content suggests a new feature
+    const isFeature = detectFeatures && isFeatureAnnouncement(addedLines);
+
     changes.push({
-      type: 'content_change',
+      type: isFeature ? 'new_feature' : 'content_change',
       description: `Significant content update (${addedLines.length} chars added, ${removedLines.length} chars removed)`,
       oldContent: removedLines.substring(0, 300),
       newContent: addedLines.substring(0, 300),
-      significance: addedLines.length > 500 ? 'High' : 'Medium'
+      significance: isFeature ? 'High' : (addedLines.length > 500 ? 'High' : 'Medium')
     });
   }
 
@@ -220,7 +240,7 @@ async function scrapeCompetitors() {
         const html = await fetchPage(page.url);
         const content = extractContent(html);
         const oldSnapshot = await loadSnapshot(competitor.id, page.name);
-        const changes = detectChanges(oldSnapshot, content);
+        const changes = detectChanges(oldSnapshot, content, page.detectFeatures || false);
 
         if (changes.length > 0 && changes[0].type !== 'new_snapshot') {
           console.log(`    Found ${changes.length} change(s)`);
